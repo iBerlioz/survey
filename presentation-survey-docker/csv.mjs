@@ -1,0 +1,2 @@
+export function toCsv(rows){const safe=v=>{let s=String(v??'');if(/^[=+@\-\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'};return '\uFEFF'+[['ФИО','Форма зачёта','Тема','Дата (UTC)','Круг'],...rows.map(r=>[r.name,r.format,r.topic,r.created_at,r.topic_round+1])].map(r=>r.map(safe).join(';')).join('\r\n')+'\r\n'}
+export function getResponses(db){return db.prepare('SELECT id,name,format,topic,created_at,topic_round FROM responses ORDER BY created_at DESC').all()}

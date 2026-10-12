@@ -1,0 +1,14 @@
+import {DatabaseSync} from 'node:sqlite';
+import {mkdirSync,readFileSync} from 'node:fs';
+import {dirname} from 'node:path';
+export const options=JSON.parse(readFileSync(new URL('./options.json',import.meta.url),'utf8'));
+export function openDatabase(path=process.env.DB_PATH||'/data/survey.sqlite'){
+ mkdirSync(dirname(path),{recursive:true});const db=new DatabaseSync(path);db.exec(`PRAGMA journal_mode=WAL;PRAGMA busy_timeout=5000;CREATE TABLE IF NOT EXISTS responses(id TEXT PRIMARY KEY,name TEXT NOT NULL,format TEXT NOT NULL,topic TEXT NOT NULL,created_at TEXT NOT NULL,reserved_topic TEXT,topic_round INTEGER NOT NULL DEFAULT 0);CREATE UNIQUE INDEX IF NOT EXISTS responses_reserved_topic_unique ON responses(reserved_topic);`);return db;
+}
+export function state(db){const rows=db.prepare('SELECT format,topic,topic_round,reserved_topic FROM responses').all();const booked=rows.filter(r=>r.reserved_topic!==null);let round=Math.max(0,...booked.map(r=>r.topic_round));let used=new Set(booked.filter(r=>r.topic_round===round).map(r=>r.topic));if(used.size>=options.topics.length){round++;used=new Set()}return {round,topics:options.topics.map((text,i)=>({id:i+1,text})).filter(t=>!used.has(t.text)),remaining:options.formats.map((f,i)=>i<3?Math.max(0,8-rows.filter(r=>r.format===f).length):null)}}
+const bookingSql=readFileSync(new URL('./booking.sql',import.meta.url),'utf8');
+export function book(db,data){const name=typeof data.name==='string'?data.name.trim():'',topic=typeof data.topic==='string'?data.topic.trim():'';if(!name||name.length>200||!options.formats.includes(data.format)||!topic||topic.length>500||!['own','list'].includes(data.mode)||(data.mode==='list'&&!options.topics.includes(topic))||!Number.isSafeInteger(data.round)||data.round<0)return {status:400,error:'Заполните все три вопроса'};
+const reserve=options.topics.includes(topic),limited=options.formats.indexOf(data.format)<3;
+const result=db.prepare(bookingSql).run(options.topics.length,crypto.randomUUID(),name,data.format,topic,new Date().toISOString(),reserve?1:0,topic,limited?1:0,data.format,reserve?1:0,data.round,topic);
+if(result.changes===1)return {status:200,ok:true};const n=db.prepare('SELECT COUNT(*) AS n FROM responses WHERE format=?').get(data.format).n;if(limited&&n>=8)return {status:409,error:'На это выступление уже записались 8 человек. Выберите другую форму зачёта.',kind:'format'};return {status:409,error:'Тему уже выбрали или начался новый круг. Выберите тему из обновлённых вариантов.',kind:'topic'};
+}
