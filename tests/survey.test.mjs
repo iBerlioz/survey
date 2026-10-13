@@ -15,6 +15,16 @@ test('HTTP: seats, duplicate topic, rollover, persistence, UTF-8, export privacy
  assert.equal((await fetch(origin+'/export.csv')).status,404);
  assert.equal((await fetch(origin+'/admin.js')).status,404);
  const adminRows=await (await fetch(admin+'/api/responses')).json();assert.equal(adminRows.responses.length,71);
+ const lookup=await fetch(origin+'/api/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'  Ирина   Берлизова '})});const found=await lookup.json();assert.equal(found.responses.length,71);assert.equal('id' in found.responses[0],false);
+ const row=adminRows.responses.find(r=>r.format===options.formats[0]);const request=(method,id,body)=>fetch(admin+'/api/responses/'+id,{method,headers:{Origin:origin,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+ assert.equal((await request('PATCH',row.id,{name:'Исправленный студент',format:options.formats[3],topic:row.topic})).status,200);
+ assert.equal((await (await fetch(origin+'/api/state')).json()).remaining[0],1);
+ assert.equal((await request('PATCH',row.id,{name:'Исправленный студент',format:options.formats[0],topic:row.topic})).status,200);
+ const other=adminRows.responses.find(r=>r.format===options.formats[3]);assert.equal((await request('PATCH',other.id,{name:other.name,format:options.formats[0],topic:other.topic})).status,409);
+ const victim=adminRows.responses.find(r=>r.topic_round===1);assert.equal((await request('DELETE',victim.id)).status,200);assert.equal((await request('DELETE',victim.id)).status,404);
+ assert.equal((await fetch(origin+'/api/responses/'+row.id,{method:'DELETE'})).status,404);
+ assert.equal((await submit(victim.topic,options.formats[3],1)).status,200);
+
  const csv=await fetch(admin+'/export.csv');assert.equal(csv.status,200);assert.match(await csv.text(),/Ирина Берлизова/);
  assert.equal((await fetch(admin+'/')).status,200);assert.equal((await fetch(admin+'/export.json')).status,200);
  await stop();await start();state=await (await fetch(origin+'/api/state')).json();assert.equal(state.topics.length,69);assert.equal(state.remaining[0],0);await stop();const db=openDatabase(dbPath);assert.equal(db.prepare('SELECT name FROM responses LIMIT 1').get().name,'Ирина Берлизова');assert.equal(db.prepare('SELECT COUNT(*) n FROM responses').get().n,71);db.close();
