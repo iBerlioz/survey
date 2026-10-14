@@ -21,7 +21,7 @@ function render(){
 }
 async function load(){el('refresh').disabled=true;try{const r=await fetch('./api/responses',{cache:'no-store'});if(!r.ok)throw Error();data=await r.json();if(el('format').options.length===1)for(const f of data.formats){const o=document.createElement('option');o.value=f;o.textContent=f;el('format').append(o)}render();el('status').textContent=`Всего ответов: ${data.responses.length}. Обновлено ${new Date().toLocaleTimeString('ru-RU')}`;el('status').className=''}catch{el('status').textContent='Не удалось загрузить ответы. Нажмите «Обновить».';el('status').className='error'}finally{el('refresh').disabled=false}}
 el('duplicates-only').addEventListener('change',render);
-el('refresh').addEventListener('click',load);el('search').addEventListener('input',render);el('format').addEventListener('change',render);load();setInterval(load,15000);
+el('refresh').addEventListener('click',load);el('search').addEventListener('input',render);el('format').addEventListener('change',render);load();
 
 let editing=null;
 function openEdit(row){editing=row.id;el('edit-name').value=row.name;el('edit-topic').value=row.topic;el('edit-error').textContent='';el('edit-format').replaceChildren();for(const f of data.formats){const o=document.createElement('option');o.textContent=f;o.value=f;el('edit-format').append(o)}el('edit-format').value=row.format;el('editor').showModal()}
