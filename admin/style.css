@@ -7,3 +7,8 @@ dialog{max-width:650px;width:95%;border:1px solid #ccd5e1;border-radius:15px;pad
 
 
 td.custom-topic,.duplicate-row td.custom-topic{background:#edf5ff}.custom-topic-badge{display:block;width:fit-content;margin-top:8px;padding:3px 9px;border:1px solid #bdd4f0;border-radius:6px;background:#dceaff;color:#214b7a;font-size:12px;font-weight:700}
+
+/* Keep row actions aligned and equal in size. */
+thead th:nth-child(6),tbody td:nth-child(6){text-align:center}
+tbody td:nth-child(6){vertical-align:middle;min-width:148px}
+tbody td:nth-child(6) button{display:block;width:116px;height:44px;padding:0 12px;margin:6px auto;line-height:1.2}
