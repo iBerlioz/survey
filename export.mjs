@@ -1,3 +1,4 @@
 import {openDatabase} from './database.mjs';
-const db=openDatabase();const rows=db.prepare('SELECT name,format,topic,created_at,topic_round FROM responses ORDER BY created_at').all();db.close();
-if(process.argv.includes('--json'))process.stdout.write(JSON.stringify(rows,null,2)+'\n');else{const safe=v=>{let s=String(v??'');if(/^[=+@\-\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'};process.stdout.write('\uFEFF'+[['ФИО','Форма зачёта','Тема','Дата (UTC)','Круг'],...rows.map(r=>[r.name,r.format,r.topic,r.created_at,r.topic_round+1])].map(r=>r.map(safe).join(';')).join('\r\n')+'\r\n')}
+import {getResponses,toCsv} from './csv.mjs';
+const db=openDatabase();const rows=getResponses(db).reverse().map(({id,...row})=>row);db.close();
+process.stdout.write(process.argv.includes('--json')?JSON.stringify(rows,null,2)+'\n':toCsv(rows));
