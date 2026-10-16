@@ -7,7 +7,7 @@ function render(){
  const duplicates=[...allGroups.values()].filter(rows=>rows.length>1);
  const extra=duplicates.reduce((n,rows)=>n+rows.length-1,0);
  el('duplicates-summary').textContent=`ФИО с повторами: ${duplicates.length}. Повторных записей сверх первой: ${extra}.`;
- const rows=data.responses.filter(r=>(!format||r.format===format)&&(!query||(r.name+' '+r.topic).toLocaleLowerCase('ru').includes(query))&&(!el('duplicates-only').checked||allGroups.get(normalizeName(r.name)).length>1));
+ const rows=data.responses.filter(r=>(!el('custom-topics-only').checked||r.topic_source==='Своя тема')&&(!format||r.format===format)&&(!query||(r.name+' '+r.topic).toLocaleLowerCase('ru').includes(query))&&(!el('duplicates-only').checked||allGroups.get(normalizeName(r.name)).length>1));
  const visibleGroups=[...groupResponses(rows).entries()].sort(([a],[b])=>Number(allGroups.get(b).length>1)-Number(allGroups.get(a).length>1));
  el('rows').replaceChildren();
  for(const [key,group] of visibleGroups){
@@ -21,6 +21,7 @@ function render(){
 }
 async function load(){el('refresh').disabled=true;try{const r=await fetch('./api/responses',{cache:'no-store'});if(!r.ok)throw Error();data=await r.json();if(el('format').options.length===1)for(const f of data.formats){const o=document.createElement('option');o.value=f;o.textContent=f;el('format').append(o)}render();el('status').textContent=`Всего ответов: ${data.responses.length}. Обновлено ${new Date().toLocaleTimeString('ru-RU')}`;el('status').className=''}catch{el('status').textContent='Не удалось загрузить ответы. Нажмите «Обновить».';el('status').className='error'}finally{el('refresh').disabled=false}}
 el('duplicates-only').addEventListener('change',render);
+el('custom-topics-only').addEventListener('change',render);
 el('refresh').addEventListener('click',load);el('search').addEventListener('input',render);el('format').addEventListener('change',render);load();setInterval(load,15000);
 
 let editing=null;
