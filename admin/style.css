@@ -4,3 +4,6 @@ dialog{max-width:650px;width:95%;border:1px solid #ccd5e1;border-radius:15px;pad
 
 
 .duplicates-summary{font-weight:700;color:#85510b}.duplicates-toggle{display:flex;align-items:center;gap:8px}.duplicates-toggle input{flex:none;min-width:0;width:18px;height:18px}.duplicate-heading th{background:#fff0cf;color:#6e4609;border-top:12px solid #f2f4f8;border-bottom:2px solid #e6c883;padding:14px 16px;font-size:14px}.duplicate-row td{background:#fffcf4}
+
+
+td.custom-topic,.duplicate-row td.custom-topic{background:#edf5ff}.custom-topic-badge{display:block;width:fit-content;margin-top:8px;padding:3px 9px;border:1px solid #bdd4f0;border-radius:6px;background:#dceaff;color:#214b7a;font-size:12px;font-weight:700}
