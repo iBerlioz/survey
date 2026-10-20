@@ -12,3 +12,5 @@ td.custom-topic,.duplicate-row td.custom-topic{background:#edf5ff}.custom-topic-
 thead th:nth-child(6),tbody td:nth-child(6){text-align:center}
 tbody td:nth-child(6){vertical-align:middle;min-width:148px}
 tbody td:nth-child(6) button{display:block;width:116px;height:44px;padding:0 12px;margin:6px auto;line-height:1.2}
+
+.roster{margin:28px 0 42px;padding:24px;background:#fff;border:1px solid #dde4ee;border-radius:14px}.roster p{line-height:1.5}.roster form{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.roster form input{min-width:0;max-width:100%}.roster a{color:#224e88}.student-no-topic td{background:#fff6e2}#student-table td:nth-child(3){white-space:pre-wrap}#student-table td:nth-child(4),#student-table th:nth-child(4){text-align:center}#student-table input[type=checkbox]{min-width:0;width:20px;height:20px;cursor:pointer}#student-message{color:#224e88}#student-summary{font-weight:bold}
