@@ -40,8 +40,15 @@ test('Roster HTTP routes are admin-only and enforce Origin; submitted flag survi
  let result=await request(admin+'/api/students/import','POST',{csv:'ФИО;Работа сдана\nИванов Иван;Нет'});assert.equal(result.status,200);assert.equal((await result.json()).added,1);
  const row=(await (await fetch(admin+'/api/students')).json()).students[0];assert.equal(row.choices.length,0);
  assert.equal((await request(admin+'/api/students/submitted','PATCH',{key:row.key,submitted:true})).status,200);
+ assert.equal((await request(admin+'/api/students/student','PATCH',{key:row.key,grade:'9'},'https://evil.example')).status,403);
+ assert.equal((await request(origin+'/api/students/student','PATCH',{key:row.key,grade:'9'})).status,404);
+ assert.equal((await request(admin+'/api/students/student','PATCH',{key:row.key,grade:'9'})).status,200);
+ assert.equal((await request(admin+'/api/students/student','PATCH',{key:row.key,grade:{bad:true}})).status,400);
+ assert.equal((await fetch(admin+'/tabs.js')).status,200);
  assert.equal((await request(admin+'/api/students/submitted','PATCH',{key:row.key,submitted:'true'})).status,400);
  assert.match(await (await fetch(admin+'/students.csv')).text(),/"Иванов Иван";"Да";"Нет"/);assert.equal((await fetch(admin+'/roster.js')).status,200);
- await stop();await start();assert.equal((await (await fetch(admin+'/api/students')).json()).students[0].submitted,true);
+ await stop();await start();const persisted=(await (await fetch(admin+'/api/students')).json()).students[0];assert.equal(persisted.submitted,true);assert.equal(persisted.grade,'9');
+ assert.equal((await request(admin+'/api/students/student','DELETE',{key:row.key},'https://evil.example')).status,403);
+ assert.equal((await request(admin+'/api/students/student','DELETE',{key:row.key})).status,200);assert.equal((await (await fetch(admin+'/api/students')).json()).students.length,0);
  }finally{await stop();rmSync(dir,{recursive:true,force:true})}
 });
